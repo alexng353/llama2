@@ -1,0 +1,13 @@
+Scripts/
+Lib/
+Include/
+share/
+
+models/
+!.gitkeep
+
+.env/
+.env
+*.env*
+*.env
+.env*
