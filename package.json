@@ -4,7 +4,9 @@
   "description": "",
   "main": "src/main.py",
   "scripts": {
-    "dev": "uvicorn src.server:app --reload"
+    "dev": "uvicorn src.server:app --reload",
+    "start": "gunicorn -k uvicorn.workers.UvicornWorker src.server:app",
+    "setup_runpod_axolotl": "pip install fastapi sse_starlette uvicorn gunicorn"
   },
   "keywords": [],
   "author": "",

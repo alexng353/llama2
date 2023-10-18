@@ -1,10 +1,16 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer, TextIteratorStreamer, PreTrainedTokenizer, PreTrainedTokenizerFast
-import timeit
+from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer, PreTrainedTokenizer, PreTrainedTokenizerFast
 from transformers.generation import GenerationConfig
 import os
-from datetime import datetime
 from threading import Thread
-from icecream import ic
+
+
+class MODELS:
+    LLAMA_2_7B_CHAT_GPTQ = "TheBloke/Llama-2-7b-Chat-GPTQ"
+    LLAMA_2_7B_GPTQ = "TheBloke/Llama-2-7b-GPTQ"
+    LLAMA_2_13B_CHAT_GPTQ = "TheBloke/Llama-2-13B-chat-GPTQ"
+    LLAMA_2_13B_GPTQ = "TheBloke/Llama-2-13B-GPTQ"
+    LLAMA_2_70B_CHAT_GPTQ = "TheBloke/Llama-2-70B-chat-GPTQ"
+    LLAMA_2_70B_GPTQ = "TheBloke/Llama-2-70B-GPTQ"
 
 
 class Llama:
@@ -13,12 +19,25 @@ class Llama:
     tokenizer: PreTrainedTokenizer | PreTrainedTokenizerFast | None = None
 
     config: GenerationConfig | None = None
-    models: list[str] = [
-        "TheBloke/Llama-2-7b-Chat-GPTQ",
-        "TheBloke/Llama-2-7b-GPTQ",
-        "TheBloke/Llama-2-13B-chat-GPTQ"
-    ]
-    hf_model = models[2]
+    hf_model: str = MODELS.LLAMA_2_7B_CHAT_GPTQ
+
+    system_prompt: str = """You are a deterministic, honest and truthful assistant program. You are being asked to generate a single multiple choice question based off of a given prompt.
+The machine that reads your responses is extremely strict, and will only accept the following XML-like format with no extraneous text:
+
+<QN>
+<T>"The question"</T>
+<OPT1>"The first option"</OPT1>
+<OPT2>"The second option"</OPT2>
+<OPT3>"The third option"</OPT3>
+<OPT4>"The fourth option"</OPT4>
+<ANS>n</ANS>
+</QN>
+
+(where n is the number of the correct answer, 1-4)
+(You may specify multiple answers by responding with <ANS>n,m,...</ANS>)
+
+Do your best to respond exactly in the aforementioned format, without any explanations of the question after the question is finished.
+Do your best to expand the format to properly fulfill the requested number of options."""
 
     MAX_TOKENS = int(os.getenv('MAX_TOKENS', '400'))
     MIN_LENGTH = int(os.getenv('MIN_LENGTH', '1'))
@@ -31,9 +50,18 @@ class Llama:
         raise RuntimeError("Call instance() instead")
 
     @classmethod
-    def instance(cls):
+    def instance(cls, **kwargs):
         if cls._instance is not None:
             return cls._instance
+
+        system_prompt = kwargs.get("system_prompt", None)
+        hf_model = kwargs.get("hf_model", None)
+
+        if system_prompt is not None:
+            cls.system_prompt = system_prompt
+
+        if hf_model is not None:
+            cls.hf_model = hf_model
 
         # instantiation code
         cls._instance = cls.__new__(cls)
@@ -60,28 +88,10 @@ class Llama:
             raise RuntimeError("Model not instantiated yet")
         if self.tokenizer is None:
             raise RuntimeError("Tokenizer not instantiated yet")
-        prompt_template = f"""[INST] <<SYS>>
-You are a deterministic, honest and truthful assistant program. You are being asked to generate a single multiple choice question based off of a given prompt.
-The machine that reads your responses is extremely strict, and will only accept the following XML-like format with no extraneous text:
 
-<QN>
-<T>"The question"</T>
-<OPT1>"The first option"</OPT1>
-<OPT2>"The second option"</OPT2>
-<OPT3>"The third option"</OPT3>
-<OPT4>"The fourth option"</OPT4>
-<ANS>n</ANS>
-</QN>
+        templated_prompt = self.get_prompt(prompt)
 
-(where n is the number of the correct answer, 1-4)
-(You may specify multiple answers by responding with <ANS>n,m,...</ANS>)
-
-Do your best to respond exactly in the aforementioned format, without any explanations of the question after the question is finished.
-Do your best to expand the format to properly fulfill the requested number of options.
-<</SYS>>
-{prompt}[/INST]"""
-
-        inputs = self.tokenizer(prompt_template, padding=True,
+        inputs = self.tokenizer(templated_prompt, padding=True,
                                 return_tensors='pt').input_ids.cuda()
 
         gen_cfg = self.get_config(self.model)
@@ -96,6 +106,12 @@ Do your best to expand the format to properly fulfill the requested number of op
         thread.start()
 
         return streamer
+
+    def get_prompt(self, prompt: str):
+        return f"""[INST] <<SYS>>
+{self.system_prompt}
+<</SYS>>
+{prompt}[/INST]"""
 
     def get_config(self, model, force: bool | None = None) -> GenerationConfig:
         if model is None:
