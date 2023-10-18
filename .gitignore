@@ -2,6 +2,7 @@ Scripts/
 Lib/
 Include/
 share/
+.venv/
 
 models/
 !.gitkeep
@@ -11,3 +12,5 @@ models/
 *.env*
 *.env
 .env*
+
+__pycache__/

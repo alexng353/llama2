@@ -2,7 +2,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import timeit
 from transformers.generation import GenerationConfig
 import os
-from datetime import datetime
 
 from icecream import ic
 ic.configureOutput(includeContext=True)
@@ -40,7 +39,7 @@ models = [
 hf_model = models[0]
 
 
-def main():
+def generate(prompt: str):
     model = AutoModelForCausalLM.from_pretrained(
         hf_model, device_map="auto", trust_remote_code=True, revision="main"
     )
@@ -53,7 +52,6 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(hf_model, use_fast=True)
     tokenizer.pad_token = tokenizer.eos_token
 
-    prompt = "Tell me about AI"
     prompt_template = f'''[INST] <<SYS>>
 You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
 <</SYS>>
@@ -61,15 +59,9 @@ User: {prompt}[/INST]
 
 '''
 
-    start_time = datetime.now()
     input_ids = tokenizer(prompt_template, padding=True,
                           return_tensors='pt').input_ids.cuda()
-    tokenize_time = datetime.now()
     generation = model.generate(inputs=input_ids, generation_config=gen_cfg)
-    generation_time = datetime.now()
-
-    print(f"Tokenize time: {tokenize_time - start_time}")
-    print(f"Generation time: {generation_time - tokenize_time}")
 
     ic(get_respose_length(input_ids, generation))
 
@@ -77,7 +69,12 @@ User: {prompt}[/INST]
     output = output.replace(prompt_template, "")
     output = f"User: {prompt}\n{output}"
 
-    print(output)
+    return output
+
+
+def main():
+    prompt = "Tell me about AI"
+    print(generate(prompt))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,12 @@
+{
+  "name": "llama2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.py",
+  "scripts": {
+    "dev": "uvicorn src.server:app --reload"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
