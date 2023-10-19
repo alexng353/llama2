@@ -39,7 +39,7 @@ The machine that reads your responses is extremely strict, and will only accept 
 Do your best to respond exactly in the aforementioned format, without any explanations of the question after the question is finished.
 Do your best to expand the format to properly fulfill the requested number of options."""
 
-    MAX_TOKENS = int(os.getenv('MAX_TOKENS', '400'))
+    MAX_TOKENS = int(os.getenv('MAX_TOKENS', '4096'))
     MIN_LENGTH = int(os.getenv('MIN_LENGTH', '1'))
     DO_SAMPLE = bool(os.getenv('DO_SAMPLE', 'True'))
     TEMPERATURE = float(os.getenv('TEMPERATURE', '0.7'))
@@ -83,16 +83,29 @@ Do your best to expand the format to properly fulfill the requested number of op
 
         return cls._instance
 
-    def generate(self, prompt: str):
+    def generate(self, prompt: list[dict[str, str]]):
         if self.model is None:
             raise RuntimeError("Model not instantiated yet")
         if self.tokenizer is None:
             raise RuntimeError("Tokenizer not instantiated yet")
 
-        templated_prompt = self.get_prompt(prompt)
+        templated = self.tokenizer.apply_chat_template(
+            prompt,
+            tokenize=False,
+            padding=True,
+            return_tensors='pt'
+        )
 
-        inputs = self.tokenizer(templated_prompt, padding=True,
-                                return_tensors='pt').input_ids.cuda()
+        print(templated)
+        print()
+
+        # templated_prompt = self.get_prompt(prompt)
+
+        inputs = self.tokenizer(
+            templated,
+            padding=True,
+            return_tensors='pt'
+        ).input_ids.cuda()
 
         gen_cfg = self.get_config(self.model)
 
@@ -107,11 +120,11 @@ Do your best to expand the format to properly fulfill the requested number of op
 
         return streamer
 
-    def get_prompt(self, prompt: str):
-        return f"""[INST] <<SYS>>
-{self.system_prompt}
-<</SYS>>
-{prompt}[/INST]"""
+#     def get_prompt(self, prompt: str):
+#         return f"""[INST] <<SYS>>
+# {self.system_prompt}
+# <</SYS>>
+# {prompt}[/INST]"""
 
     def get_config(self, model, force: bool | None = None) -> GenerationConfig:
         if model is None:
