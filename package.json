@@ -6,7 +6,17 @@
   "scripts": {
     "dev": "uvicorn src.server:app --reload",
     "start": "gunicorn -k uvicorn.workers.UvicornWorker src.server:app",
-    "setup_runpod_axolotl": "pip install fastapi sse_starlette uvicorn gunicorn"
+    "setup-venv": "python3 -m venv .venv",
+    "pip:install-required": "pip install fastapi uvicorn gunicorn transformers",
+    "pip:install-gptq": "pip install auto-gptq optimum",
+    "....spacer": "echo ----------------------------------------------------------------------",
+    "torch:install-windows-default": "npm run torch:install-windows-cu121",
+    "torch:install-windows-cu121": "pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121",
+    "torch:install-windows-cu118": "pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118",
+    "torch:install-linux-default": "npm run torch:install-linux-cu121",
+    "torch:install-linux-cu121": "pip3 install torch torchvision torchaudio",
+    "torch:install-linux-cu118": "pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118",
+    "torch:install-osx-default": "pip3 install torch torchvision torchaudio"
   },
   "keywords": [],
   "author": "",
