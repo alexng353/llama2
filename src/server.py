@@ -53,7 +53,13 @@ async def chat(request: Request):
                 "data": new_text
             })
 
-    return EventSourceResponse(event_generator(), sep="\n")
+    return EventSourceResponse(
+        event_generator(),
+        sep="\n",
+        media_type="application/x-ndjson",
+        delay=STREAM_DELAY,
+        retry=RETRY_TIMEOUT
+    )
 
 if __name__ == "__main__":
     import uvicorn
