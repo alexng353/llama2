@@ -4,10 +4,6 @@
 
 Uses NPM for scripting and pip for python dependencies.
 
-# !! This application DOES NOT use standard SSE !!
-
-Streaming routes return [JSONL](https://jsonlines.org/) instead of standard `data: ` SSE. This is because I think the standard SSE format is silly and JSONL is much easier to parse.
-
 ## Requirements
 
 - Python 3.10.x || 3.11.x (other versions may work but are not tested)
