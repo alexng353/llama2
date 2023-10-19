@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "uvicorn src.server:app --reload",
     "start": "gunicorn -k uvicorn.workers.UvicornWorker src.server:app",
-    "setup-venv": "python3 -m venv .venv",
+    "venv:setup": "python3 -m venv .venv",
+    "venv:activate": ".venv/bin/activate",
     "pip:install-required": "pip install fastapi uvicorn gunicorn transformers",
     "pip:install-gptq": "pip install auto-gptq optimum",
     "....spacer": "echo ----------------------------------------------------------------------",

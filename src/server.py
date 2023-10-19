@@ -1,27 +1,32 @@
 from fastapi import FastAPI, Request, Response
-from .llama import Llama, MODELS
-from transformers import AutoTokenizer
-from .sse.sse import EventSourceResponse
 import json
 
+# Local imports
+from .llama import Llama, MODELS
+from .sse.sse import EventSourceResponse
+
 app = FastAPI()
+
+with open("system.txt", "r") as f:
+    SYSTEM_PROMPT = f.read()
+
+MODEL = MODELS.LLAMA_2_13B_CHAT_GPTQ
+STREAM_DELAY = 1  # second
+RETRY_TIMEOUT = 15000  # milisecond
 
 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
-STREAM_DELAY = 1  # second
-RETRY_TIMEOUT = 15000  # milisecond
-
-with open("system.txt", "r") as f:
-    system_prompt = f.read()
-
 
 @app.get('/chat')
 async def chat(request: Request):
-    llama = Llama.instance(system_prompt=system_prompt,
-                           hf_model=MODELS.LLAMA_2_13B_CHAT_GPTQ)
+    llama = Llama.instance(
+        system_prompt=SYSTEM_PROMPT,
+        hf_model=MODEL
+    )
+
     prompt = request.query_params.get("prompt")
 
     if prompt is None:
@@ -29,7 +34,7 @@ async def chat(request: Request):
 
     chat = [
         # {"role": "system", "content": f"<<SYS>>{system_prompt}<</SYS>>"},
-        {"role": "system", "content": system_prompt},
+        {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": "Hello!"},
         {"role": "assistant", "content": "Hello there, young mathematician! I'm Cosmo, your friendly and intelligent assistant here to help you learn all about limits and continuity in calculus!"},
         {"role": "user", "content": prompt},
@@ -49,11 +54,6 @@ async def chat(request: Request):
             })
 
     return EventSourceResponse(event_generator(), sep="\n")
-
-tokenizer = AutoTokenizer.from_pretrained(
-    MODELS.LLAMA_2_13B_CHAT_GPTQ, use_fast=True, device_map="auto")
-tokenizer.pad_token = tokenizer.eos_token
-
 
 if __name__ == "__main__":
     import uvicorn

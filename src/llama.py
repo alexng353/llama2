@@ -54,6 +54,9 @@ Do your best to expand the format to properly fulfill the requested number of op
         if cls._instance is not None:
             return cls._instance
 
+        print("Instantiating Llama...")
+        print("This may take a while...")
+
         system_prompt = kwargs.get("system_prompt", None)
         hf_model = kwargs.get("hf_model", None)
 
@@ -80,6 +83,8 @@ Do your best to expand the format to properly fulfill the requested number of op
         tokenizer.pad_token = tokenizer.eos_token
 
         cls.tokenizer = tokenizer
+
+        print("Llama instantiated!")
 
         return cls._instance
 
