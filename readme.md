@@ -26,6 +26,8 @@ Uses NPM for scripting and pip for python dependencies.
 You can install torch with either the `npm` script or the [torch install website](https://pytorch.org/get-started/locally/)
 
 ```bash
+git clone https://github.com/alexng353/llama2
+
 npm run venv:setup
 npm run venv:activate
 
@@ -53,7 +55,8 @@ npm run torch:install-{platform}-{version}
 
 ## Modifying Settings
 
-This application comes with reasonable defaults for running on a local machine.
+> This application comes with reasonable defaults for running on a local machine.
+
 `./src/llama.py` includes a class called `MODELS` which contains a default list of models that I think would be most popular. To change the model, go `line 13` of `./src/server.py` and use either a model from the `MODELS` class or a any huggingface model name.
 
 > Any model from [TheBloke's GPTQ Quantisations](https://huggingface.co/TheBloke?search_models=gptq) will work, non-gptq models are untested but may work with modifications to the code.
