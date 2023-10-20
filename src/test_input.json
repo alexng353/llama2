@@ -1,0 +1,12 @@
+{
+  "input": {
+    "chat": [
+      { "role": "user", "content": "Hello!" },
+      {
+        "role": "assistant",
+        "content": "Hello there, young mathematician! I'm Cosmo, your friendly and intelligent assistant here to help you learn all about limits and continuity in calculus!"
+      },
+      { "role": "user", "content": "What are limits?" }
+    ]
+  }
+}

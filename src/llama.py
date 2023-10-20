@@ -59,6 +59,7 @@ Do your best to expand the format to properly fulfill the requested number of op
 
         system_prompt = kwargs.get("system_prompt", None)
         hf_model = kwargs.get("hf_model", None)
+        local_model = bool(kwargs.get("local_model", None))
 
         if system_prompt is not None:
             cls.system_prompt = system_prompt
@@ -70,7 +71,11 @@ Do your best to expand the format to properly fulfill the requested number of op
         cls._instance = cls.__new__(cls)
 
         model = AutoModelForCausalLM.from_pretrained(
-            cls.hf_model, device_map="auto", trust_remote_code=True, revision="main"
+            cls.hf_model,
+            device_map="auto",
+            trust_remote_code=True,
+            revision="main",
+            local_files_only=local_model
         )
 
         model.config.max_new_tokens = cls.MAX_TOKENS
