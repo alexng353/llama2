@@ -25,9 +25,9 @@ console.log(json);
 
 const id = json.id;
 
-async function check() {
-  const response = await fetch(
-    `https://api.runpod.ai/v2/k3b5bv3ncsey82/status/${id}`,
+async function stream() {
+  const streaming_response = await fetch(
+    `https://api.runpod.ai/v2/k3b5bv3ncsey82/stream/${id}`,
     {
       method: "POST",
       headers: {
@@ -37,23 +37,52 @@ async function check() {
     }
   );
 
-  const json = await response.json();
+  const json = await streaming_response.json();
 
   console.log(json);
 
-  return json;
+  return JSON.stringify(json);
 }
 
-let counter = 0;
 while (true) {
-  console.log(`Checking for the ${counter++}th time...`);
-  const json = await check();
+  const text = await stream();
 
-  if (json.status === "COMPLETED") {
+  if (text.includes("COMPLETED")) {
     break;
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 10_000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 }
+
+// async function check() {
+//   const response = await fetch(
+//     `https://api.runpod.ai/v2/k3b5bv3ncsey82/status/${id}`,
+//     {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${process.env.RUNPOD_KEY}`,
+//       },
+//     }
+//   );
+
+//   const json = await response.json();
+
+//   console.log(json);
+
+//   return json;
+// }
+
+// let counter = 0;
+// while (true) {
+//   console.log(`Checking for the ${counter++}th time...`);
+//   const json = await check();
+
+//   if (json.status === "COMPLETED" || json.status === "IN_PROGRESS") {
+//     break;
+//   }
+
+//   await new Promise((resolve) => setTimeout(resolve, 10_000));
+// }
 
 export {};

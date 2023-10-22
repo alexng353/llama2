@@ -22,9 +22,10 @@ def handler(job):
     streamer = llama.generate(chat)
 
     for new_text in streamer:
-        yield json.dumps({
-            "data": new_text
-        })
+        if (new_text == ""):
+            continue
+        yield new_text
+
         # print(new_text, end="", flush=True)
         # output += new_text
 
