@@ -7,7 +7,7 @@ const response = await fetch("https://api.runpod.ai/v2/k3b5bv3ncsey82/run", {
   body: JSON.stringify({
     input: {
       chat: [
-        { role: "user", content: "Hello!" },
+        { role: "user", content: "Hello! What is your name?" },
         {
           role: "assistant",
           content:
@@ -39,50 +39,28 @@ async function stream() {
 
   const json = await streaming_response.json();
 
-  console.log(json);
-
-  return JSON.stringify(json);
+  return json as { status: string; stream: { output: string }[] };
 }
 
-while (true) {
-  const text = await stream();
+const stream_response: string[] = [];
 
-  if (text.includes("COMPLETED")) {
+while (true) {
+  const json = await stream();
+
+  console.log(json.stream);
+
+  if (json.status === "COMPLETED") {
+    json.stream.forEach((x) => stream_response.push(x.output));
     break;
+  }
+
+  if (json.status === "IN_PROGRESS") {
+    json.stream.forEach((x) => stream_response.push(x.output));
   }
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
-// async function check() {
-//   const response = await fetch(
-//     `https://api.runpod.ai/v2/k3b5bv3ncsey82/status/${id}`,
-//     {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${process.env.RUNPOD_KEY}`,
-//       },
-//     }
-//   );
-
-//   const json = await response.json();
-
-//   console.log(json);
-
-//   return json;
-// }
-
-// let counter = 0;
-// while (true) {
-//   console.log(`Checking for the ${counter++}th time...`);
-//   const json = await check();
-
-//   if (json.status === "COMPLETED" || json.status === "IN_PROGRESS") {
-//     break;
-//   }
-
-//   await new Promise((resolve) => setTimeout(resolve, 10_000));
-// }
+console.log(stream_response.map((x) => x).join(""));
 
 export {};
