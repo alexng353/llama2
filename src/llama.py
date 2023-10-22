@@ -130,6 +130,16 @@ Do your best to expand the format to properly fulfill the requested number of op
 
         return streamer
 
+    def tokenize(self, prompt: str):
+        templated = self.tokenizer.apply_chat_template(
+            prompt,
+            tokenize=False,
+            padding=True,
+            return_tensors='pt'
+        )
+
+        return templated
+
 #     def get_prompt(self, prompt: str):
 #         return f"""[INST] <<SYS>>
 # {self.system_prompt}

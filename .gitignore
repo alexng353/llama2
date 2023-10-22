@@ -16,3 +16,6 @@ models/
 __pycache__/
 
 **/*system.txt
+
+
+test_input.json

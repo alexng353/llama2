@@ -2,6 +2,7 @@
   "name": "llama2",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "src/main.py",
   "scripts": {
     "dev": "uvicorn src.server:app --reload",
@@ -9,7 +10,7 @@
     "venv:setup": "python3 -m venv .venv",
     "venv:activate": ".venv/bin/activate",
     "pip:install-required": "pip install fastapi uvicorn gunicorn transformers",
-    "pip:install-gptq": "pip install auto-gptq optimum",
+    "pip:install-gptq": "pip install auto-gptq optimum accelerate",
     "....spacer": "echo ----------------------------------------------------------------------",
     "torch:install-windows-default": "npm run torch:install-windows-cu121",
     "torch:install-windows-cu121": "pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121",
@@ -17,7 +18,10 @@
     "torch:install-linux-default": "npm run torch:install-linux-cu121",
     "torch:install-linux-cu121": "pip3 install torch torchvision torchaudio",
     "torch:install-linux-cu118": "pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118",
-    "torch:install-osx-default": "pip3 install torch torchvision torchaudio"
+    "torch:install-osx-default": "pip3 install torch torchvision torchaudio",
+    "docker:build": "docker build -t llama2-serverless .",
+    "docker:tag": "docker tag llama2-serverless alexng353/llama2-serverless:latest",
+    "docker:push": "docker push alexng353/llama2-serverless:latest"
   },
   "keywords": [],
   "author": "",

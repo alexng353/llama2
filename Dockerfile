@@ -5,11 +5,17 @@ FROM python:3.11.1-buster
 WORKDIR /app
 
 # Install runpod
-RUN pip install runpod
+RUN pip install runpod icecream transformers torch torchvision torchaudio accelerate optimum auto-gptq
 
 # Add your file
-ADD src/serverless.py .
-ADD src/llama.py .
+ADD src/__init__.py ./src/
+ADD src/serverless.py ./src/
+ADD src/llama.py ./src/
+
+# ADD ./models ./models
+
+# ADD ./test_input.json ./test_input.json
+
 
 # Call your file when your container starts
-CMD [ "python", "-u", "serverless.py" ]
+CMD [ "python", "-u", "./src/serverless.py" ]
