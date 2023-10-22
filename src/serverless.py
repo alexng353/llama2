@@ -1,6 +1,5 @@
 import runpod
-from icecream import ic
-import os
+import json
 
 # local imports
 from llama import Llama
@@ -22,12 +21,14 @@ def handler(job):
 
     streamer = llama.generate(chat)
 
-    output = ""
     for new_text in streamer:
-        print(new_text, end="", flush=True)
-        output += new_text
+        yield json.dumps({
+            "data": new_text
+        })
+        # print(new_text, end="", flush=True)
+        # output += new_text
 
-    return {"output": output}
+    # return output
 
 # def handler(job):
 #     directory = job["input"]["directory"]
@@ -37,4 +38,7 @@ def handler(job):
 #     return {"output": stuff}
 
 
-runpod.serverless.start({"handler": handler})
+runpod.serverless.start({
+    "handler": handler,
+    "return_aggregate_stream": True
+})
