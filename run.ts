@@ -1,8 +1,17 @@
-const response = await fetch("https://api.runpod.ai/v2/k3b5bv3ncsey82/run", {
+const RUNPOD_KEY = process.env.RUNPOD_KEY;
+if (!RUNPOD_KEY) {
+  throw new Error("No runpod api key provided");
+}
+const ENDPOINT_ID = process.env.RUNPOD_ENDPOINT_ID;
+if (!ENDPOINT_ID) {
+  throw new Error("No endpoint id provided");
+}
+
+const response = await fetch(`https://api.runpod.ai/v2/${ENDPOINT_ID}/run`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${process.env.RUNPOD_KEY}`,
+    Authorization: `Bearer ${RUNPOD_KEY}`,
   },
   body: JSON.stringify({
     input: {
@@ -20,14 +29,13 @@ const response = await fetch("https://api.runpod.ai/v2/k3b5bv3ncsey82/run", {
 });
 
 const json = await response.json();
-
 console.log(json);
 
 const id = json.id;
 
 async function stream() {
   const streaming_response = await fetch(
-    `https://api.runpod.ai/v2/k3b5bv3ncsey82/stream/${id}`,
+    `https://api.runpod.ai/v2/${ENDPOINT_ID}/stream/${id}`,
     {
       method: "POST",
       headers: {
@@ -44,18 +52,19 @@ async function stream() {
 
 const stream_response: string[] = [];
 
-while (true) {
+let done = false;
+while (!done) {
   const json = await stream();
-
   console.log(json.stream);
 
-  if (json.status === "COMPLETED") {
-    json.stream.forEach((x) => stream_response.push(x.output));
-    break;
-  }
-
-  if (json.status === "IN_PROGRESS") {
-    json.stream.forEach((x) => stream_response.push(x.output));
+  switch (json.status) {
+    case "COMPLETED":
+      json.stream.forEach((x) => stream_response.push(x.output));
+      done = true;
+      break;
+    case "IN_PROGRESS":
+      json.stream.forEach((x) => stream_response.push(x.output));
+      break;
   }
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
