@@ -1,9 +1,12 @@
+from llama import Llama
 import runpod
 import json
 import os
+from auto_gptq import exllama_set_max_input_length
+
+exllama_set_max_input_length(4096)
 
 # local imports
-from llama import Llama
 
 MODEL = os.getenv("MODEL", "/runpod-volume/models/Llama-2-70B-chat-GPTQ")
 
